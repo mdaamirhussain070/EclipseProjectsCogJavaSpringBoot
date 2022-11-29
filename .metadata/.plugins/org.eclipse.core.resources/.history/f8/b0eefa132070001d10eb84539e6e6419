@@ -1,0 +1,52 @@
+package com.userservice.controller;
+
+import com.userservice.entity.User;
+import com.userservice.exception.GlobalException;
+import com.userservice.exception.UserNotFoundException;
+import com.userservice.service.UserService;
+import com.userservice.utility.UserRouting;
+import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Slf4j
+@RestController
+public class UserController {
+
+	private static final Logger log=LoggerFactory.getLogger(UserController.class);
+    @Autowired
+    private UserService userService;
+    @PostMapping(value= UserRouting.CREATE_USER)
+    public ResponseEntity<User> createUser(@RequestBody User user){
+        LocalDate localDate=LocalDate.now();
+        log.info("User creation Started"+localDate);
+        User user1=userService.createUser(user);
+        return new ResponseEntity<>(user1, HttpStatus.CREATED);
+    }
+    @GetMapping(value = UserRouting.GET_ALL_USER)
+    public ResponseEntity<List<User>> getAllUser(){
+        List<User> userList=userService.getAllUser();
+        return new ResponseEntity<>(userList, HttpStatus.OK);
+    }
+    @PutMapping(value = UserRouting.UPDATE_USER)
+    public ResponseEntity<User> updateUser(@RequestBody User user ){
+
+        User Updateduser=userService.updateUser(user);
+
+        return new ResponseEntity<>(Updateduser, HttpStatus.OK);
+    }
+    @DeleteMapping(value=UserRouting.DELETE_USER)
+    public ResponseEntity<User> deleteUser(@PathVariable("id") int id) throws UserNotFoundException {
+        User user=userService.deleteUser(id);
+        return new ResponseEntity<>(user,HttpStatus.OK);
+    }
+
+}

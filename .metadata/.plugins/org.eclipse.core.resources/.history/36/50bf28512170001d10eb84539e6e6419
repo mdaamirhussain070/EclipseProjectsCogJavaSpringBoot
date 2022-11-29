@@ -1,0 +1,71 @@
+package com.userservice.userserviceImpl;
+
+import com.userservice.dao.UserRepo;
+import com.userservice.entity.User;
+import com.userservice.exception.GlobalException;
+import com.userservice.exception.UserNotFoundException;
+import com.userservice.service.UserService;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+@Slf4j
+@Service
+public class UserServiceimpl implements UserService {
+	
+	private static final Logger log=LoggerFactory.getLogger(UserServiceimpl.class);
+
+    @Autowired
+    private UserRepo userRepo;
+
+    @Override
+    public User createUser(User user) {
+
+        return userRepo.save(user);
+
+    }
+
+    @Override
+    public List<User> getAllUser() {
+
+        List<User> userList=userRepo.findAll();
+        return userList;
+    }
+
+    @Override
+    public User updateUser(User user) {
+    	LocalDate localDate=LocalDate.now();
+		log.info("Start Updating User Detail"+localDate);
+		log.info("Checking Data Base "+localDate);
+        boolean userOld=userRepo.existsById(user.getId());
+        User savedUser = null;
+        if(userOld==true){
+        	
+            Optional<User> preUser=userRepo.findById(user.getId());
+            if((preUser.isPresent()))
+                preUser.get().setUserName(user.getUserName());
+                preUser.get().setPassword(user.getPassword());
+            savedUser=userRepo.save(preUser.get());
+        }else throw new UserNotFoundException("User Not Found ", user.getId());
+
+        return savedUser;
+    }
+
+    @Override
+    public User deleteUser(int id) throws UserNotFoundException {
+
+        Optional<User> user=userRepo.findById(id);
+        if(user.isPresent()){
+            userRepo.deleteById(user.get().getId());
+        }else throw new UserNotFoundException(" ID Not Found ",id);
+
+        return user.get();
+    }
+}
